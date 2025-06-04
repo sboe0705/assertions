@@ -2,6 +2,7 @@ package assertions
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -33,7 +34,7 @@ func TestAssertIntFailing(t *testing.T) {
 	}
 }
 
-func TestAssertArraySucceeding(t *testing.T) {
+func TestAssertIntArraySucceeding(t *testing.T) {
 	mockT := &mockT{}
 
 	// when
@@ -45,7 +46,7 @@ func TestAssertArraySucceeding(t *testing.T) {
 	}
 }
 
-func TestAssertArrayFailing(t *testing.T) {
+func TestAssertIntArrayFailing(t *testing.T) {
 	mockT := &mockT{}
 
 	// when
@@ -58,6 +59,45 @@ func TestAssertArrayFailing(t *testing.T) {
 
 	if mockT.Messages[0] != "Arrays differ (expected: [1 2 3], actual: [1 2 3 4])" {
 		t.Errorf("Expected different message than '%s'", mockT.Messages[0])
+	}
+}
+
+type TestStruct struct {
+	value int
+}
+
+func TestAssertStructArrayFailing(t *testing.T) {
+	mockT := &mockT{}
+
+	// when
+	AssertArray(mockT, []TestStruct{TestStruct{0}}, []TestStruct{TestStruct{1}}, "Arrays differ")
+
+	// then
+	if len(mockT.Messages) != 1 {
+		t.Errorf("Expected 1 message")
+	}
+
+	if mockT.Messages[0] != "Arrays differ (expected: [{value:0}], actual: [{value:1}])" {
+		t.Errorf("Expected different message than '%s'", mockT.Messages[0])
+	}
+}
+
+type TestInterface interface {
+}
+
+func TestAssertInterfaceArrayFailing(t *testing.T) {
+	mockT := &mockT{}
+
+	// when
+	AssertArray(mockT, []TestInterface{&TestStruct{0}}, []TestInterface{&TestStruct{1}}, "Arrays differ")
+
+	// then
+	if len(mockT.Messages) != 1 {
+		t.Errorf("Expected 1 message")
+	}
+
+	if !strings.Contains(mockT.Messages[0], "Arrays differ") {
+		t.Errorf("Message '%s' missing required substring", mockT.Messages[0])
 	}
 }
 
