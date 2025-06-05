@@ -6,6 +6,13 @@ import (
 	"testing"
 )
 
+type TestStruct struct {
+	value int
+}
+
+type TestInterface interface {
+}
+
 func TestAssertIntSucceeding(t *testing.T) {
 	mockT := &mockT{}
 
@@ -30,6 +37,40 @@ func TestAssertIntFailing(t *testing.T) {
 	}
 
 	if mockT.Messages[0] != "Values differ (expected: 1, actual: 2)" {
+		t.Errorf("Expected different message than '%s'", mockT.Messages[0])
+	}
+}
+
+func TestAssertObjectSucceeding(t *testing.T) {
+	mockT := &mockT{}
+
+	object1 := &TestStruct{0}
+	object2 := object1
+
+	// when
+	AssertObject(mockT, object1, object2, "Objects differ")
+
+	// then
+	if len(mockT.Messages) != 0 {
+		t.Errorf("Expected no messages")
+	}
+}
+
+func TestAssertObjectFailing(t *testing.T) {
+	mockT := &mockT{}
+
+	object1 := &TestStruct{0}
+	object2 := &TestStruct{0}
+
+	// when
+	AssertObject(mockT, object1, object2, "Objects differ")
+
+	// then
+	if len(mockT.Messages) != 1 {
+		t.Errorf("Expected 1 message")
+	}
+
+	if !strings.Contains(mockT.Messages[0], "Objects differ") {
 		t.Errorf("Expected different message than '%s'", mockT.Messages[0])
 	}
 }
@@ -62,10 +103,6 @@ func TestAssertIntArrayFailing(t *testing.T) {
 	}
 }
 
-type TestStruct struct {
-	value int
-}
-
 func TestAssertStructArrayFailing(t *testing.T) {
 	mockT := &mockT{}
 
@@ -80,9 +117,6 @@ func TestAssertStructArrayFailing(t *testing.T) {
 	if mockT.Messages[0] != "Arrays differ (expected: [{value:0}], actual: [{value:1}])" {
 		t.Errorf("Expected different message than '%s'", mockT.Messages[0])
 	}
-}
-
-type TestInterface interface {
 }
 
 func TestAssertInterfaceArrayFailing(t *testing.T) {

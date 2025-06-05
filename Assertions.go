@@ -14,6 +14,12 @@ func AssertInt(t TestReporter, expected, actual int, message string) {
 	}
 }
 
+func AssertObject[T comparable](t TestReporter, expected, actual T, message string) {
+	if expected != actual {
+		t.Errorf("%s (expected: %p, actual: %p)", message, &expected, &actual)
+	}
+}
+
 func AssertArray[T any](t TestReporter, expected, actual []T, message string) {
 	if !reflect.DeepEqual(expected, actual) {
 		if containsStructs(expected) {
