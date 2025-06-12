@@ -8,15 +8,21 @@ type TestReporter interface {
 	Errorf(format string, args ...any)
 }
 
-func AssertInt(t TestReporter, expected, actual int, message string) {
-	if expected != actual {
-		t.Errorf("%s (expected: %v, actual: %v)", message, expected, actual)
-	}
+func AssertTrue(t TestReporter, actual any, message string) {
+	AssertEquals(t, true, actual, message)
 }
 
-func AssertObject[T comparable](t TestReporter, expected, actual T, message string) {
+func AssertFalse(t TestReporter, actual any, message string) {
+	AssertEquals(t, false, actual, message)
+}
+
+func AssertEquals[T comparable](t TestReporter, expected, actual T, message string) {
 	if expected != actual {
-		t.Errorf("%s (expected: %p, actual: %p)", message, &expected, &actual)
+		if isPointer(expected) {
+			t.Errorf("%s (expected: %p, actual: %p)", message, &expected, &actual)
+		} else {
+			t.Errorf("%s (expected: %v, actual: %v)", message, expected, actual)
+		}
 	}
 }
 
@@ -41,4 +47,9 @@ func containsStructs[T any](data []T) bool {
 		}
 	}
 	return true
+}
+
+func isPointer(value any) bool {
+	t := reflect.TypeOf(value)
+	return t.Kind() == reflect.Ptr
 }

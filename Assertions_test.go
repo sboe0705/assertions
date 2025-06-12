@@ -10,26 +10,69 @@ type TestStruct struct {
 	value int
 }
 
-type TestInterface interface {
-}
+type TestInterface any
 
-func TestAssertIntSucceeding(t *testing.T) {
+func TestAssertTrue(t *testing.T) {
 	mockT := &mockT{}
 
 	// when
-	AssertInt(mockT, 1, 1, "Values differ")
+	AssertTrue(mockT, true, "Values differ")
 
 	// then
 	if len(mockT.Messages) != 0 {
 		t.Errorf("Expected no messages")
 	}
+
+	// when
+	AssertTrue(mockT, false, "Values differ")
+
+	// then
+	if len(mockT.Messages) != 1 {
+		t.Errorf("Expected 1 message")
+	}
+
+	if mockT.Messages[0] != "Values differ (expected: true, actual: false)" {
+		t.Errorf("Expected different message than '%s'", mockT.Messages[0])
+	}
 }
 
-func TestAssertIntFailing(t *testing.T) {
+func TestAssertFalse(t *testing.T) {
 	mockT := &mockT{}
 
 	// when
-	AssertInt(mockT, 1, 2, "Values differ")
+	AssertFalse(mockT, false, "Values differ")
+
+	// then
+	if len(mockT.Messages) != 0 {
+		t.Errorf("Expected no messages")
+	}
+
+	// when
+	AssertFalse(mockT, true, "Values differ")
+
+	// then
+	if len(mockT.Messages) != 1 {
+		t.Errorf("Expected 1 message")
+	}
+
+	if mockT.Messages[0] != "Values differ (expected: false, actual: true)" {
+		t.Errorf("Expected different message than '%s'", mockT.Messages[0])
+	}
+}
+
+func TestAssertEquals(t *testing.T) {
+	mockT := &mockT{}
+
+	// when
+	AssertEquals(mockT, 1, 1, "Values differ")
+
+	// then
+	if len(mockT.Messages) != 0 {
+		t.Errorf("Expected no messages")
+	}
+
+	// when
+	AssertEquals(mockT, 1, 2, "Values differ")
 
 	// then
 	if len(mockT.Messages) != 1 {
@@ -41,41 +84,35 @@ func TestAssertIntFailing(t *testing.T) {
 	}
 }
 
-func TestAssertObjectSucceeding(t *testing.T) {
+func TestAssertEqualsWithInterface(t *testing.T) {
 	mockT := &mockT{}
 
 	object1 := &TestStruct{0}
 	object2 := object1
+	object3 := &TestStruct{0}
 
 	// when
-	AssertObject(mockT, object1, object2, "Objects differ")
+	AssertEquals(mockT, object1, object2, "Objects differ")
 
 	// then
 	if len(mockT.Messages) != 0 {
 		t.Errorf("Expected no messages")
 	}
-}
-
-func TestAssertObjectFailing(t *testing.T) {
-	mockT := &mockT{}
-
-	object1 := &TestStruct{0}
-	object2 := &TestStruct{0}
 
 	// when
-	AssertObject(mockT, object1, object2, "Objects differ")
+	AssertEquals(mockT, object1, object3, "Objects differ")
 
 	// then
 	if len(mockT.Messages) != 1 {
 		t.Errorf("Expected 1 message")
 	}
 
-	if !strings.Contains(mockT.Messages[0], "Objects differ") {
+	if !strings.Contains(mockT.Messages[0], "Objects differ (expected: 0x") {
 		t.Errorf("Expected different message than '%s'", mockT.Messages[0])
 	}
 }
 
-func TestAssertIntArraySucceeding(t *testing.T) {
+func TestAssertArrayWithInt(t *testing.T) {
 	mockT := &mockT{}
 
 	// when
@@ -85,10 +122,6 @@ func TestAssertIntArraySucceeding(t *testing.T) {
 	if len(mockT.Messages) != 0 {
 		t.Errorf("Expected no messages")
 	}
-}
-
-func TestAssertIntArrayFailing(t *testing.T) {
-	mockT := &mockT{}
 
 	// when
 	AssertArray(mockT, []int{1, 2, 3}, []int{1, 2, 3, 4}, "Arrays differ")
@@ -103,7 +136,7 @@ func TestAssertIntArrayFailing(t *testing.T) {
 	}
 }
 
-func TestAssertStructArrayFailing(t *testing.T) {
+func TestAssertArrayWithStruct(t *testing.T) {
 	mockT := &mockT{}
 
 	// when
@@ -119,7 +152,7 @@ func TestAssertStructArrayFailing(t *testing.T) {
 	}
 }
 
-func TestAssertInterfaceArrayFailing(t *testing.T) {
+func TestAssertArrayWithInterface(t *testing.T) {
 	mockT := &mockT{}
 
 	// when
